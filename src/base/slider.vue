@@ -112,6 +112,9 @@
               this._setSliderWidth(true)
               this.slider.refresh()
             })
+        },
+        destroyed() {
+          clearTimeout(this.timer)
         }
     }
 </script>
