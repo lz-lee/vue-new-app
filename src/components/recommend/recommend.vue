@@ -1,11 +1,12 @@
 <template>
   <div class="recommend">
-      <div class="recommend-content">
+    <scroll class="recommend-content" :data="distList" ref='scroll'>
+      <div>
           <div v-if="recommends.length" class="slider-wrapper">
               <slider>
                   <div v-for="item in recommends">
                       <a :href="item.linkUrl">
-                          <img class="needsclick" :src="item.picUrl">
+                          <img @load="loadImage" class="needsclick" :src="item.picUrl">
                       </a>
                   </div>
               </slider>
@@ -25,18 +26,21 @@
             </ul>
           </div>
       </div>
+    </scroll>
   </div>
 </template>
 <script>
   import {getRecommend, getDistList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
   import slider from 'base/slider'
+  import Scroll from 'base/scroll'
 
   export default {
       data() {
           return {
               recommends: [],
-              distList: []
+              distList: [],
+              checkLoaded: false
           }
       },
       created() {
@@ -61,10 +65,18 @@
             }).catch((err) => {
               console.log(err)
             })
+          },
+          loadImage() {
+            // 设置标识位，让refresh只触发一次
+            if (!this.checkLoaded) {
+              this.$refs.scroll.refresh()
+              this.checkLoaded = true
+            }
           }
       },
       components: {
-          slider
+          slider,
+          Scroll
       }
   }
 </script>
