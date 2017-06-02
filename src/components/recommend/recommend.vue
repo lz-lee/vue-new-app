@@ -16,7 +16,7 @@
             <ul>
               <li v-for="item in distList" class="item" @click="selectItem(item)">
                 <div class="icon">
-                  <img :src="item.imgurl" width="60" height="60">
+                  <img v-lazy="item.imgurl" width="60" height="60">
                 </div>
                 <div class="text">
                   <h2 class="name" v-html="item.creator.name"></h2>
@@ -26,6 +26,9 @@
             </ul>
           </div>
       </div>
+      <div class="loading-content" v-show="!distList.length">
+        <loading></loading>
+      </div>
     </scroll>
   </div>
 </template>
@@ -34,7 +37,7 @@
   import {ERR_OK} from 'api/config'
   import slider from 'base/slider'
   import Scroll from 'base/scroll'
-
+  import loading from 'base/loading'
   export default {
       data() {
           return {
@@ -45,7 +48,9 @@
       },
       created() {
           this._getRecommend()
-          this._getDistList()
+          setTimeout(() => {
+            this._getDistList()
+          }, 500)
       },
       methods: {
           _getRecommend() {
@@ -76,7 +81,8 @@
       },
       components: {
           slider,
-          Scroll
+          Scroll,
+          loading
       }
   }
 </script>
@@ -125,5 +131,9 @@
               color $color-text
             .desc
               color $color-text-d
-            
+      .loading-content
+        width 100%  
+        position absolute
+        top 50%
+        transform translateY(-50%)
 </style>

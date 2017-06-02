@@ -4,7 +4,11 @@ import App from './App'
 import router from './router'
 
 import fastclick from 'fastclick'
+import vueLazyLoad from 'vue-lazyload'
 
+Vue.use(vueLazyLoad, {
+    loading: require('common/image/default.png')
+})
 // 解决点击事件300ms延时
 fastclick.attach(document.body)
 
