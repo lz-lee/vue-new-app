@@ -10,7 +10,9 @@
             <li v-for="group in data" class="list-group" ref="listGroup">
                 <h2 class="list-group-title">{{group.title}}</h2>
                 <ul>
-                    <li v-for="item in group.items" class="list-group-item">
+                    <li v-for="item in group.items" 
+                        class="list-group-item"
+                        @click="selectItem(item)">
                         <img class="avatar" v-lazy="item.avatar">
                         <span class="name">{{item.name}}</span>
                     </li>
@@ -111,6 +113,9 @@
             }
         },
         methods: {
+            selectItem(item) {
+                this.$emit('select', item)
+            },
             onShortcutTouchStart(el) {
                 let anchorIndex = el.target.dataset.index
                 this.touch.y1 = el.touches[0].pageY
@@ -190,7 +195,7 @@
                   font-size: $font-size-medium
         .list-shortcut
             position: absolute
-            z-index: 30
+            z-index: 2
             right: 0
             top: 50%
             transform: translateY(-50%)
