@@ -65,10 +65,11 @@
               if (res.code === ERR_OK) {
                 this.distList = res.data.list
               } else {
-                throw new Error('get song list errcode' + res.data.code)
+                throw new Error('get song list errcode' + res.code)
               }
             }).catch((err) => {
               console.log(err)
+              // do something
             })
           },
           loadImage() {
