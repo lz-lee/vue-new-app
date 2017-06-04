@@ -27,7 +27,10 @@
     import scroll from 'base/scroll'
     import songList from 'base/song-list'
     import loading from 'base/loading'
+    import {prefix} from 'common/js/prefix'
     const RESERVED_HEIGHT = 40
+    const transform = prefix('transform')
+    const backdrop = prefix('backdrop-filter')
 
     export default {
         props: {
@@ -59,7 +62,17 @@
                 let translateY = Math.max(this.minTranslateY, newY)
                 let zIndex = 0
                 let scale = 1
-                this.$refs.layer.style.transform = `translate3d(0, ${translateY}px, 0)`
+                let blur = 0
+                const percent = Math.abs(newY / this.imageHeight)
+                // 往下拉 放大 scale大于1
+                if (newY > 0) {
+                    scale = 1 + percent
+                    zIndex = 2
+                } else {
+                    blur = Math.min(20 * percent, 20)
+                }
+                this.$refs.layer.style[transform] = `translate3d(0, ${translateY}px, 0)`
+                this.$refs.filter.style[backdrop] = `blur(${blur}px)`
                 // 滚动到顶部,改变z-index和图片的高度
                 if (newY < this.minTranslateY) {
                     zIndex = 2
@@ -70,6 +83,7 @@
                     this.$refs.bgImage.style.height = 0
                 }
                 this.$refs.bgImage.style.zIndex = zIndex
+                this.$refs.bgImage.style[transform] = `scale(${scale})`
             }
         },
         computed: {
