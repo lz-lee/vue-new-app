@@ -1,8 +1,8 @@
 <template>
     <scroll class="listview" 
             :data="data"
-            :listenScroll="listenScroll"
-            :probeType="probeType"
+            :listen-scroll="listenScroll"
+            :probe-type="probeType"
             ref="listview"
             @scroll="scroll"
             >
