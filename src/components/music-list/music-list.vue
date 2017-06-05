@@ -15,7 +15,7 @@
                 class="list" 
                 ref="list">
             <div class="song-list-wrapper">
-                <song-list :songs="songs"></song-list>
+                <song-list :songs="songs" @select="selectItem"></song-list>
             </div>
             <div class="loading-container" v-show="!songs.length">
                 <loading></loading>
@@ -32,6 +32,7 @@
     const transform = prefix('transform')
     const backdrop = prefix('backdrop-filter')
 
+    import {mapActions} from 'vuex'
     export default {
         props: {
             bgImage: {
@@ -97,7 +98,16 @@
             },
             scroll(pos) {
                 this.scrollY = pos.y
-            }
+            },
+            selectItem(item, index) {
+                this.selectPlay({
+                    list: this.songs,
+                    index: index
+                })
+            },
+            ...mapActions([
+                'selectPlay'
+            ])
         },
         mounted() {
             this.imageHeight = this.$refs.bgImage.clientHeight
