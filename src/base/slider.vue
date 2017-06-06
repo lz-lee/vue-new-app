@@ -62,6 +62,7 @@
                     click: true,
                     momentum: false,
                     snap: true,
+                    // 是否无缝轮播
                     snapLoop: this.loop,
                     snapSpeed: 400,
                     snapThreshold: 0.3  // 滑动时页面可切换的阈值
@@ -74,9 +75,13 @@
                   this.currentPageIndex = pageIndex
                   // 清除定时，防止手动操作时改变index与自动轮播相冲突
                   if (this.autoPlay) {
-                    clearTimeout(this.timer)
                     this._play()
                   }
+                  this.slider.on('beforeScrollStart', () => {
+                    if (this.autoPlay) {
+                      clearTimeout(this.timer)
+                    }
+                  })
                 })
             },
             _initDots() {
