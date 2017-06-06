@@ -19,7 +19,7 @@
                 </ul>
             </li>
         </ul>
-        <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove">
+        <div class="list-shortcut" @touchstart.stop.prevent="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove" @touchend.stop>
             <ul>
                 <li v-for="(item, index) in shortcutLits" 
                     class="item"
@@ -145,7 +145,7 @@
                 // 点击 获取 scrollY的位置
                 this.scrollY = -this.listHeight[index]
                 // 点击／触摸右侧字母，左侧联动
-                this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)
+                this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 300)
             },
             _calcHeight() {
                 let group = this.$refs.listGroup
