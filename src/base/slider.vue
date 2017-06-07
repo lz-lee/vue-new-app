@@ -96,6 +96,11 @@
                 // goToPage(x, y, time), snap为true时，滚动到对应的页面
                 this.slider.goToPage(pageIndex, 0, 400)
               }, this.interval)
+            },
+            refresh() {
+              // 设置一个标识，当resize时不需要将容器宽度加上两倍宽度，调用bsrcoll的refresh来重新计算width
+              this._setSliderWidth(true)
+              this.slider.refresh()
             }
         },
         mounted() {
@@ -113,9 +118,9 @@
               if (!this.slider) {
                 return
               }
-              // 设置一个标识，当resize时不需要将容器宽度加上两倍宽度，调用bsrcoll的refresh来重新计算width
-              this._setSliderWidth(true)
-              this.slider.refresh()
+              setTimeout(() => {
+                this.refresh()
+              }, 20)
             })
         },
         activated() {

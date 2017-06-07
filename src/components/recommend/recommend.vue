@@ -3,7 +3,7 @@
     <scroll class="recommend-content" :data="distList" ref='scroll'>
       <div>
           <div v-if="recommends.length" class="slider-wrapper">
-              <slider>
+              <slider ref="slider">
                   <div v-for="item in recommends">
                       <a :href="item.linkUrl">
                           <img @load="loadImage" class="needsclick" :src="item.picUrl">
@@ -79,6 +79,11 @@
               this.checkLoaded = true
             }
           }
+      },
+      activated() {
+        setTimeout(() => {
+          this.$refs.slider && this.$refs.slider.refresh()
+        })
       },
       components: {
           slider,
