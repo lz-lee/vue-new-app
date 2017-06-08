@@ -29,7 +29,7 @@
                 <div class="progress-wrapper">
                     <span class="time time-l">{{format(currentTime)}}</span>
                     <div class="progress-bar-wrapper">
-                        <progress-bar :percent="percent"></progress-bar>
+                        <progress-bar :percent="percent" @percentChange="onPercentChange"></progress-bar>
                     </div>
                     <span class="time time-r">{{format(currentSong.duration)}}</span>
                 </div>
@@ -212,6 +212,12 @@
                 const minute = interval / 60 | 0
                 const second = this._leftPad(interval % 60)
                 return `${minute}:${second}`
+            },
+            onPercentChange(percent) {
+              const currentTime = this.currentSong.duration * percent
+              this.$refs.audio.currentTime = currentTime
+              // 暂停状态下拖动结束后改变状态
+              if (!this.playing) this.togglePlaying()
             },
             _leftPad(num, n = 2) {
                 let len = num.toString().length
