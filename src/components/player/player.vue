@@ -63,10 +63,12 @@
                 <p class="desc" v-html="currentSong.singer"></p>
             </div>
             <div class="control">
-                <i :class="miniIcon" @click.stop.prevent="togglePlaying"></i>
+                <progress-circle :radius="radius" :percent="percent">
+                    <i :class="miniIcon" class="icon-mini" @click.stop.prevent="togglePlaying"></i>
+                </progress-circle>
             </div>
             <div class="control">
-                <i class="icon-playlist"></i>
+                    <i class="icon-playlist"></i>
             </div>
         </div>
     </transition>
@@ -78,6 +80,8 @@
     import animations from 'create-keyframe-animation'
     import {prefix} from 'common/js/prefix'
     import ProgressBar from 'base/progress-bar'
+    import ProgressCircle from 'base/progress-circle'
+
     const transform = prefix('transform')
 
     export default {
@@ -85,7 +89,8 @@
             return {
                 // 可快速点击 prev 和next
                 songReady: false,
-                currentTime: 0
+                currentTime: 0,
+                radius: 32
             }
         },
         watch: {
@@ -246,7 +251,8 @@
             })
         },
         components: {
-            ProgressBar
+            ProgressBar,
+            ProgressCircle
         }
     }
 </script>
@@ -434,7 +440,11 @@
                 .icon-play-mini, .icon-pause-mini, .icon-playlist
                   font-size: 30px
                   color: $color-theme-d
-    
+                .icon-mini
+                    font-size 32px
+                    position absolute
+                    left 0
+                    top 0
     @keyframes rotate 
         0%
             transform rotate(0)
