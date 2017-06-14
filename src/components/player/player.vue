@@ -16,12 +16,18 @@
                 <h1 class="title" v-html="currentSong.name"></h1>
                 <h2 class="subtitle" v-html="currentSong.singer"></h2>
             </div>
-            <div class="middle">
-                <div class="middle-l">
+            <div class="middle"
+                 @touchstart="middleTouchStart"
+                 @touchmove="middleTouchMove"
+                 @touchend="middleTouchEnd">
+                <div class="middle-l" ref="middlel">
                     <div class="cd-wrapper" ref="cdWrapper">
                         <div class="cd" :class="cdCls">
                             <img class="image" :src="currentSong.image">
                         </div>
+                    </div>
+                    <div class="playing-lyric-wrapper">
+                      <div class="playing-lyric">{{playingLyric}}</div>
                     </div>
                 </div>
                 <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
@@ -36,6 +42,10 @@
                 </scroll>
             </div>
             <div class="bottom">
+                <div class="dot-wrapper">
+                  <span class="dot" :class="{'active': currentShow === 'cd'}"></span>
+                  <span class="dot" :class="{'active': currentShow === 'lyric'}"></span>
+                </div>
                 <div class="progress-wrapper">
                     <span class="time time-l">{{format(currentTime)}}</span>
                     <div class="progress-bar-wrapper">
@@ -97,7 +107,7 @@
     import scroll from 'base/scroll'
 
     const transform = prefix('transform')
-
+    const transitionDuration = prefix('transitionDuration')
     export default {
         data() {
             return {
@@ -106,16 +116,21 @@
                 currentTime: 0,
                 radius: 32,
                 currentLyric: null,
-                currentLineNum: 0
+                currentLineNum: 0,
+                currentShow: 'cd',
+                playingLyric: ''
             }
         },
         watch: {
             currentSong(newSong, oldSong) {
                 if (newSong.id === oldSong.id) return
-                this.$nextTick(() => {
+                if (this.currentLyric) {
+                  this.currentLyric.stop()
+                }
+                setTimeout(() => {
                     this.$refs.audio.play()
                     this.getLyric()
-                })
+                }, 1000)
             },
             playing(newVal) {
                 // 缓存audio
@@ -124,6 +139,9 @@
                     newVal ? audio.play() : audio.pause()
                 })
             }
+        },
+        created() {
+          this.touch = {}
         },
         computed: {
             cdCls() {
@@ -203,17 +221,24 @@
             },
             togglePlaying() {
                 this.setPlayingState(!this.playing)
+                if (this.currentLyric) {
+                  this.currentLyric.togglePlay()
+                }
             },
             prev() {
                 if (!this.songReady) return
-                let index = this.currentIndex - 1
-                if (index === -1) index = this.playlist.length - 1
-                this.setCurrentIndex(index)
-                // 暂停状态切换歌曲，需要改变图标状态
-                if (!this.playing) {
-                    this.togglePlaying()
+                if (this.playlist.length === 1) {
+                  this.loop()
+                } else {
+                  let index = this.currentIndex - 1
+                  if (index === -1) index = this.playlist.length - 1
+                  this.setCurrentIndex(index)
+                  // 暂停状态切换歌曲，需要改变图标状态
+                  if (!this.playing) {
+                      this.togglePlaying()
+                  }
+                  this.songReady = false
                 }
-                this.songReady = false
             },
             end() {
               if (this.mode === playMode.loop) {
@@ -225,16 +250,24 @@
             loop() {
                 this.$refs.audio.currentTime = 0
                 this.$refs.audio.play()
+                if (this.currentLyric) {
+                  this.currentLyric.seek(0)
+                }
             },
             next() {
                 if (!this.songReady) return
-                let index = this.currentIndex + 1
-                if (index === this.playlist.length) index = 0
-                this.setCurrentIndex(index)
-                if (!this.playing) {
-                    this.togglePlaying()
+                // 处理playlist 只有一条数据的情况
+                if (this.playlist.length === 1) {
+                  this.loop()
+                } else {
+                  let index = this.currentIndex + 1
+                  if (index === this.playlist.length === 1.length) index = 0
+                  this.setCurrentIndex(index)
+                  if (!this.playing) {
+                      this.togglePlaying()
+                  }
+                  this.songReady = false
                 }
-                this.songReady = false
             },
             ready() {
                 this.songReady = true
@@ -257,6 +290,9 @@
               this.$refs.audio.currentTime = currentTime
               // 暂停状态下拖动结束后改变状态
               if (!this.playing) this.togglePlaying()
+              if (this.currentLyric) {
+                this.currentLyric.seek(currentTime * 1000)
+              }
             },
             changeMode() {
                 const mode = (this.mode + 1) % 3
@@ -282,6 +318,10 @@
                 if (this.playing) {
                   this.currentLyric.play()
                 }
+              }).catch(() => {
+                this.currentLyric = null
+                this.playingLyric = ''
+                this.currentLineNum = 0
               })
             },
             handleLyric({lineNum, txt}) {
@@ -292,6 +332,56 @@
               } else {
                 this.$refs.lyricList.scrollToElement(0, 0, 1000)
               }
+              // 实时歌词
+              this.playingLyric = txt
+            },
+            middleTouchStart(e) {
+              this.touch.initaited = true
+              this.touch.startX = e.touches[0].pageX
+              this.touch.startY = e.touches[0].pageY
+            },
+            middleTouchMove(e) {
+              if (!this.touch.initaited) return
+              const diffX = e.touches[0].pageX - this.touch.startX
+              const diffY = e.touches[0].pageY - this.touch.startY
+              if (Math.abs(diffY) > Math.abs(diffX)) return
+              const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
+              const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + diffX))
+              this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
+              this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0 , 0)`
+              this.$refs.lyricList.$el.style[transitionDuration] = 0
+              this.$refs.middlel.style.opacity = 1 - this.touch.percent
+              this.$refs.middlel.style[transitionDuration] = 0
+            },
+            middleTouchEnd(e) {
+              let offsetWidth
+              let opacity
+              if (this.currentShow === 'cd') {
+                if (this.touch.percent > 0.1) {
+                  offsetWidth = -window.innerWidth
+                  this.currentShow = 'lyric'
+                  opacity = 0
+                } else {
+                  offsetWidth = 0
+                  opacity = 1
+                }
+              } else {
+                if (this.touch.percent < 0.9) {
+                  offsetWidth = 0
+                  this.currentShow = 'cd'
+                  // 不透明
+                  opacity = 1
+                } else {
+                  offsetWidth = -window.innerWidth
+                  // 透明
+                  opacity = 0
+                }
+              }
+              const time = 300
+              this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0 , 0)`
+              this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
+              this.$refs.middlel.style.opacity = opacity
+              this.$refs.middlel.style[transitionDuration] = `${time}ms`
             },
             _leftPad(num, n = 2) {
                 let len = num.toString().length
