@@ -24,6 +24,16 @@
                         </div>
                     </div>
                 </div>
+                <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+                  <div class="lyric-wrapper">
+                    <div v-if="currentLyric">
+                      <p ref="lyricLine"
+                         class="text"
+                         :class="{'current': currentLineNum === index}"
+                         v-for="(line, index) in currentLyric.lines">{{line.txt}}</p>
+                    </div>
+                  </div>
+                </scroll>
             </div>
             <div class="bottom">
                 <div class="progress-wrapper">
@@ -81,8 +91,10 @@
     import {prefix} from 'common/js/prefix'
     import {playMode} from 'common/js/config'
     import {shuffle} from 'common/js/util'
+    import Lyric from 'lyric-parser'
     import ProgressBar from 'base/progress-bar'
     import ProgressCircle from 'base/progress-circle'
+    import scroll from 'base/scroll'
 
     const transform = prefix('transform')
 
@@ -92,7 +104,9 @@
                 // 可快速点击 prev 和next
                 songReady: false,
                 currentTime: 0,
-                radius: 32
+                radius: 32,
+                currentLyric: null,
+                currentLineNum: 0
             }
         },
         watch: {
@@ -100,7 +114,7 @@
                 if (newSong.id === oldSong.id) return
                 this.$nextTick(() => {
                     this.$refs.audio.play()
-                    this.currentSong.getLyric()
+                    this.getLyric()
                 })
             },
             playing(newVal) {
@@ -262,6 +276,23 @@
                 })
                 this.setCurrentIndex(index)
             },
+            getLyric() {
+              this.currentSong.getLyric().then((res) => {
+                this.currentLyric = new Lyric(res, this.handleLyric)
+                if (this.playing) {
+                  this.currentLyric.play()
+                }
+              })
+            },
+            handleLyric({lineNum, txt}) {
+              this.currentLineNum = lineNum
+              if (lineNum > 5) {
+                let lineEl = this.$refs.lyricLine[lineNum - 5]
+                this.$refs.lyricList.scrollToElement(lineEl, 1000)
+              } else {
+                this.$refs.lyricList.scrollToElement(0, 0, 1000)
+              }
+            },
             _leftPad(num, n = 2) {
                 let len = num.toString().length
                 while (len < n) {
@@ -292,7 +323,8 @@
         },
         components: {
             ProgressBar,
-            ProgressCircle
+            ProgressCircle,
+            scroll
         }
     }
 </script>
@@ -391,6 +423,22 @@
                                 width: 100%
                                 height: 100%
                                 border-radius: 50%
+                .middle-r
+                  display inline-block
+                  vertical-align top
+                  width 100%
+                  height 100%
+                  overflow hidden
+                  .lyric-wrapper
+                    width 80%
+                    margin 0 auto
+                    text-align center
+                    .text
+                      line-height 32px
+                      color $color-text-l
+                      font-size $font-size-medium
+                      &.current
+                        color $color-text
             .bottom
                 position: absolute
                 bottom: 50px
