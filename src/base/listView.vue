@@ -19,7 +19,10 @@
                 </ul>
             </li>
         </ul>
-        <div class="list-shortcut" @touchstart.stop.prevent="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove" @touchend.stop>
+        <div class="list-shortcut"
+             @touchstart.stop.prevent="onShortcutTouchStart"
+             @touchmove.stop.prevent="onShortcutTouchMove"
+             @touchend.stop>
             <ul>
                 <li v-for="(item, index) in shortcutLits" 
                     class="item"

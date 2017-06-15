@@ -17,8 +17,8 @@
                 <h2 class="subtitle" v-html="currentSong.singer"></h2>
             </div>
             <div class="middle"
-                 @touchstart="middleTouchStart"
-                 @touchmove="middleTouchMove"
+                 @touchstart.prevent="middleTouchStart"
+                 @touchmove.prevent="middleTouchMove"
                  @touchend="middleTouchEnd">
                 <div class="middle-l" ref="middlel">
                     <div class="cd-wrapper" ref="cdWrapper">
@@ -92,7 +92,7 @@
             </div>
         </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+    <audio ref="audio" :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
     </div>
 </template>
 <script>
@@ -127,6 +127,7 @@
                 if (this.currentLyric) {
                   this.currentLyric.stop()
                 }
+                // 保证微信从后台到前台仍能播放
                 setTimeout(() => {
                     this.$refs.audio.play()
                     this.getLyric()
@@ -237,8 +238,8 @@
                   if (!this.playing) {
                       this.togglePlaying()
                   }
-                  this.songReady = false
                 }
+                this.songReady = false
             },
             end() {
               if (this.mode === playMode.loop) {
@@ -261,13 +262,13 @@
                   this.loop()
                 } else {
                   let index = this.currentIndex + 1
-                  if (index === this.playlist.length === 1.length) index = 0
+                  if (index === this.playlist.length) index = 0
                   this.setCurrentIndex(index)
                   if (!this.playing) {
                       this.togglePlaying()
                   }
-                  this.songReady = false
                 }
+                this.songReady = false
             },
             ready() {
                 this.songReady = true
@@ -290,6 +291,7 @@
               this.$refs.audio.currentTime = currentTime
               // 暂停状态下拖动结束后改变状态
               if (!this.playing) this.togglePlaying()
+              // 拖动滚动条，歌词找到对应位置
               if (this.currentLyric) {
                 this.currentLyric.seek(currentTime * 1000)
               }
@@ -337,6 +339,9 @@
             },
             middleTouchStart(e) {
               this.touch.initaited = true
+              // 判断是否是一次移动, 解决点击bug
+              // touchstart -> touchmove -> touchend -> click
+              this.touch.moved = false
               this.touch.startX = e.touches[0].pageX
               this.touch.startY = e.touches[0].pageY
             },
@@ -345,6 +350,9 @@
               const diffX = e.touches[0].pageX - this.touch.startX
               const diffY = e.touches[0].pageY - this.touch.startY
               if (Math.abs(diffY) > Math.abs(diffX)) return
+              if (!this.touch.moved) {
+                this.touch.moved = true
+              }
               const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
               const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + diffX))
               this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
@@ -354,6 +362,9 @@
               this.$refs.middlel.style[transitionDuration] = 0
             },
             middleTouchEnd(e) {
+              if (!this.touch.moved) {
+                return
+              }
               let offsetWidth
               let opacity
               if (this.currentShow === 'cd') {
@@ -513,6 +524,16 @@
                                 width: 100%
                                 height: 100%
                                 border-radius: 50%
+                    .playing-lyric-wrapper
+                      width 80%
+                      margin 30px auto 0 auto
+                      overflow hidden
+                      text-align center
+                      .playing-lyric
+                        height 20px
+                        line-height 20px
+                        font-size $font-size-medium
+                        color $color-text-l
                 .middle-r
                   display inline-block
                   vertical-align top
@@ -533,6 +554,21 @@
                 position: absolute
                 bottom: 50px
                 width: 100%
+                .dot-wrapper
+                  text-align center
+                  font-size 0
+                  .dot
+                    display inline-block
+                    vertical-align middle
+                    margin 0  4px
+                    width 8px
+                    height 8px
+                    border-radius 50%
+                    background $color-text-l
+                    &.active
+                      width 20px
+                      border-radius 5px
+                      background $color-text-ll
                 .progress-wrapper
                     display flex
                     align-items center
