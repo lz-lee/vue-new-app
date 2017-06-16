@@ -67,22 +67,12 @@
                     snapSpeed: 400,
                     snapThreshold: 0.3  // 滑动时页面可切换的阈值
                 })
-                this.slider.on('scrollEnd', () => {
-                  let pageIndex = this.slider.getCurrentPage().pageX
-                  if (this.loop) {
-                    pageIndex -= 1
-                  }
-                  this.currentPageIndex = pageIndex
-                  // 清除定时，防止手动操作时改变index与自动轮播相冲突
+                this.slider.on('scrollEnd', this._onScrollEnd)
+                // 滑动轮播图时，暂停自动轮播
+                this.slider.on('beforeScrollStart', () => {
                   if (this.autoPlay) {
-                    this._play()
+                    clearTimeout(this.timer)
                   }
-                  // 滑动轮播图时，暂停自动轮播
-                  this.slider.on('beforeScrollStart', () => {
-                    if (this.autoPlay) {
-                      clearTimeout(this.timer)
-                    }
-                  })
                 })
             },
             _initDots() {
@@ -97,6 +87,17 @@
                 // goToPage(x, y, time), snap为true时，滚动到对应的页面
                 this.slider.goToPage(pageIndex, 0, 400)
               }, this.interval)
+            },
+            _onScrollEnd() {
+              let pageIndex = this.slider.getCurrentPage().pageX
+              if (this.loop) {
+                pageIndex -= 1
+              }
+              this.currentPageIndex = pageIndex
+              // 清除定时，防止手动操作时改变index与自动轮播相冲突
+              if (this.autoPlay) {
+                this._play()
+              }
             },
             refresh() {
               // 设置一个标识，当resize时不需要将容器宽度加上两倍宽度，调用bsrcoll的refresh来重新计算width
@@ -119,9 +120,18 @@
               if (!this.slider) {
                 return
               }
-              setTimeout(() => {
+              clearTimeout(this.resizeTimer)
+              this.resizeTimer = setTimeout(() => {
+                if (this.slider.isInTransition) {
+                  this._onScrollEnd()
+                } else {
+                  if (this.autoPlay) {
+                    clearTimeout(this.timer)
+                    this._play()
+                  }
+                }
                 this.refresh()
-              }, 20)
+              }, 60)
             })
         },
         activated() {
