@@ -124,6 +124,7 @@
         watch: {
             currentSong(newSong, oldSong) {
                 if (newSong.id === oldSong.id) return
+                this.songReady = false
                 if (this.currentLyric) {
                   this.currentLyric.stop()
                   this.currentLyric = null
@@ -139,6 +140,8 @@
                 }, 1000)
             },
             playing(newVal) {
+                // 当歌曲没有 ready 的时候，切换不要播放歌曲。
+                if (!this.songReady) return
                 // 缓存audio
                 const audio = this.$refs.audio
                 this.$nextTick(() => {
@@ -251,7 +254,6 @@
                       this.togglePlaying()
                   }
                 }
-                this.songReady = false
             },
             end() {
               if (this.mode === playMode.loop) {
@@ -280,7 +282,6 @@
                       this.togglePlaying()
                   }
                 }
-                this.songReady = false
             },
             ready() {
                 this.songReady = true
