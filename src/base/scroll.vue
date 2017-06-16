@@ -5,6 +5,9 @@
 </template>
 <script>
     import BScroll from 'better-scroll'
+
+    const DIRECTION_H = 'horizontal'
+    const DIRECTION_V = 'vertical'
     export default {
         props: {
             probeType: {
@@ -23,6 +26,10 @@
             listenScroll: {
                 type: Boolean,
                 default: false
+            },
+            direction: {
+                type: String,
+                default: DIRECTION_V
             }
         },
         mounted() {
@@ -35,7 +42,8 @@
                 if (!this.$refs.wrapper) return
                 this.scroll = new BScroll(this.$refs.wrapper, {
                     probeType: this.probeType,
-                    click: this.click
+                    click: this.click,
+                    eventPassthrough: this.direction === DIRECTION_V ? DIRECTION_H : DIRECTION_V
                 })
                 if (this.listenScroll) {
                     // let that = this

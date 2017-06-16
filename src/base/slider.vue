@@ -65,9 +65,15 @@
                     // 是否无缝轮播
                     snapLoop: this.loop,
                     snapSpeed: 400,
-                    snapThreshold: 0.3  // 滑动时页面可切换的阈值
+                    // 滑动时页面可切换的阈值
+                    snapThreshold: 0.3
                 })
                 this.slider.on('scrollEnd', this._onScrollEnd)
+                this.slider.on('touchend', () => {
+                  if (this.autoPlay) {
+                    this._play()
+                  }
+                })
                 // 滑动轮播图时，暂停自动轮播
                 this.slider.on('beforeScrollStart', () => {
                   if (this.autoPlay) {
@@ -83,6 +89,7 @@
               if (this.loop) {
                 pageIndex += 1
               }
+              clearTimeout(this.timer)
               this.timer = setTimeout(() => {
                 // goToPage(x, y, time), snap为true时，滚动到对应的页面
                 this.slider.goToPage(pageIndex, 0, 400)
@@ -126,7 +133,6 @@
                   this._onScrollEnd()
                 } else {
                   if (this.autoPlay) {
-                    clearTimeout(this.timer)
                     this._play()
                   }
                 }

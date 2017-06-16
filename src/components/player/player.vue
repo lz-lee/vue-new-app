@@ -126,9 +126,14 @@
                 if (newSong.id === oldSong.id) return
                 if (this.currentLyric) {
                   this.currentLyric.stop()
+                  this.currentLyric = null
+                  this.currentTime = 0
+                  this.playingLyric = ''
+                  this.currentLineNum = 0
                 }
+                clearTimeout(this.timer)
                 // 保证微信从后台到前台仍能播放
-                setTimeout(() => {
+                this.timer = setTimeout(() => {
                     this.$refs.audio.play()
                     this.getLyric()
                 }, 1000)
@@ -325,7 +330,9 @@
               this.currentSong.getLyric().then((res) => {
                 this.currentLyric = new Lyric(res, this.handleLyric)
                 if (this.playing) {
-                  this.currentLyric.play()
+                  // 此时用户有可能已经播放了歌曲，切到对应位置
+                  const currentTime = this.currentSong.duration * this.percent * 1000
+                  this.currentLyric.seek(currentTime)
                 }
               }).catch(() => {
                 this.currentLyric = null
