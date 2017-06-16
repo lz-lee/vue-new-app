@@ -139,6 +139,13 @@
                 this.$nextTick(() => {
                     newVal ? audio.play() : audio.pause()
                 })
+            },
+            fullscreen(newVal) {
+              if (newVal) {
+                setTimeout(() => {
+                  this.$refs.lyricList.refresh()
+                })
+              }
             }
         },
         created() {
@@ -633,7 +640,7 @@
                         animation-play-state: paused
             .text
                 display flex
-                flex-direciton columm
+                flex-direction column
                 justify-content center
                 flex 1
                 line-height 20px

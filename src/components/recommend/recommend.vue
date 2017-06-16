@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend">
+  <div class="recommend" ref="recommend">
     <scroll class="recommend-content" :data="distList" ref='scroll'>
       <div>
           <div v-if="recommends.length" class="slider-wrapper">
@@ -38,7 +38,10 @@
   import slider from 'base/slider'
   import Scroll from 'base/scroll'
   import loading from 'base/loading'
+  import {playlistMixin} from 'common/js/mixin'
+
   export default {
+      mixins: [playlistMixin],
       data() {
           return {
               recommends: [],
@@ -53,6 +56,11 @@
           }, 500)
       },
       methods: {
+          handPlaylist(playlist) {
+            const bottom = playlist.length > 0 ? '60px' : 0.4
+            this.$refs.recommend.style.bottom = bottom
+            this.$refs.scroll.refresh()
+          },
           _getRecommend() {
               getRecommend().then((res) => {
                   if (res.code === ERR_OK) {
@@ -75,8 +83,10 @@
           loadImage() {
             // 设置标识位，让refresh只触发一次
             if (!this.checkLoaded) {
-              this.$refs.scroll.refresh()
               this.checkLoaded = true
+              setTimeout(() => {
+                this.$refs.scroll.refresh()
+              }, 20)
             }
           }
       },

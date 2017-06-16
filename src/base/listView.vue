@@ -137,6 +137,9 @@
                 this.scrollY = pos.y
                 // console.log(this.scorllY)
             },
+            refresh() {
+                this.$refs.listview.refresh()
+            },
             _scrollTo(index) {
                 if (!index && index !== 0) return
                 // 处理边界

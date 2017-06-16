@@ -77,6 +77,7 @@
                   if (this.autoPlay) {
                     this._play()
                   }
+                  // 滑动轮播图时，暂停自动轮播
                   this.slider.on('beforeScrollStart', () => {
                     if (this.autoPlay) {
                       clearTimeout(this.timer)
