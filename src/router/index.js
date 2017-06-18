@@ -7,7 +7,7 @@ import singer from 'components/singer/singer'
 import recommend from 'components/recommend/recommend'
 import singerDetail from 'components/singer-detail/singer-detail'
 import disc from 'components/disc/disc'
-
+import topList from 'components/top-list/top-list'
 Vue.use(Router)
 
 export default new Router({
@@ -40,7 +40,11 @@ export default new Router({
       },
       {
         path: '/rank',
-        component: rank
+        component: rank,
+        children: [{
+          path: ':id',
+          component: topList
+        }]
       }
   ]
 })

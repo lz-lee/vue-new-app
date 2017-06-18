@@ -40,7 +40,6 @@ export function getSongList(disstid) {
         type: 1,
         json: 1,
         utf8: 1,
-        g_tk: 67232076,
         platform: 'yqq',
         hostUin: 0,
         onlySong: 0,
