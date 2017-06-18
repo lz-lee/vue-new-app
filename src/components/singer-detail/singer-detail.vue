@@ -25,6 +25,7 @@
                     this.$router.push({
                         path: '/singer'
                     })
+                    return
                 }
                 getSingerDetail(this.singer.id).then((res) => {
                     if (res.code === ERR_OK) {
