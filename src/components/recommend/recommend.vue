@@ -3,6 +3,7 @@
     <scroll class="recommend-content" :data="distList" ref='scroll'>
       <div>
           <div v-if="recommends.length" class="slider-wrapper">
+            <div class="slider-content">
               <slider ref="slider">
                   <div v-for="item in recommends">
                       <a :href="item.linkUrl">
@@ -10,6 +11,7 @@
                       </a>
                   </div>
               </slider>
+            </div>
           </div>
           <div class="recommend-list">
             <h1 class="list-title">热门歌单推荐</h1>
@@ -116,6 +118,14 @@
         position relative
         overflow hidden
         width 100%
+        height 0 
+        padding-top 40%
+        .slider-content
+          position absolute
+          top 0 
+          left 0
+          width 100%
+          height 100%
       .recommend-list
         .list-title
           height 65px
