@@ -30,6 +30,10 @@
             direction: {
                 type: String,
                 default: DIRECTION_V
+            },
+            pullUp: {
+                type: Boolean,
+                default: false
             }
         },
         mounted() {
@@ -49,6 +53,14 @@
                     // let that = this
                     this.scroll.on('scroll', (pos) => {
                         this.$emit('scroll', pos)
+                    })
+                }
+
+                if (this.pullUp) {
+                    this.scroll.on('scrollEnd', () => {
+                        if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+                            this.$emit('scrollToEnd')
+                        }
                     })
                 }
             },
