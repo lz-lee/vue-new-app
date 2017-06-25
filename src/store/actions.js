@@ -33,3 +33,47 @@ function findIndex(list, song) {
     return item.id === song.id
   })
 }
+
+export const insertSong = function({commit, state}, song) {
+  let playlist = state.playlist.slice()
+  let sequencelist = state.sequencelist.slice()
+  let currentIndex = state.currentIndex
+
+  let currentSong = playlist[currentIndex]
+  // 查找待插入歌曲在原有列表中的索引，删除的也是这个索引对应的歌曲
+  let fpIndex = findIndex(playlist, song)
+
+  currentIndex++
+
+  playlist.splice(currentIndex, 0, song)
+
+  if (fpIndex > -1) {
+    // 插入的歌曲在原有列表中歌曲的后面
+    if (currentIndex > fpIndex) {
+      playlist.splice(fpIndex, 1)
+      currentIndex--
+    } else {
+      playlist.splice(fpIndex + 1, 1)
+    }
+  }
+
+  // sequencelist 应该要插入的位置
+  let currentSIndex = findIndex(sequencelist, currentSong) + 1
+  // 找原有位置
+  let fsIndex = findIndex(sequencelist, song)
+  // 插入歌曲
+  sequencelist.splice(currentSIndex, 0, song)
+
+  if (fsIndex > -1) {
+    if (currentSIndex > fsIndex) {
+      sequencelist.splice(fsIndex, 1)
+    } else {
+      sequencelist.splice(fsIndex + 1, 1)
+    }
+  }
+  commit(types.SET_PLAYLIST, playlist)
+  commit(types.SET_CURRENT_INDEX, currentIndex)
+  commit(types.SET_SEQUENCE_LIST, sequencelist)
+  commit(types.SET_FULL_SCREEN, true)
+  commit(types.SET_PLAYING_STATE, true)
+}

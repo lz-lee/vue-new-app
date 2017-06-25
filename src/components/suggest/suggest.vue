@@ -6,7 +6,8 @@
 					ref="suggest">
 		<ul class="suggest-list">
 			<li class="suggest-item"
-					v-for="item in result">
+					v-for="item in result"
+					@click="selectItem(item)">
 				<div class="icon">
 					<i :class="getItemCls(item)"></i>
 				</div>
@@ -16,15 +17,24 @@
 			</li>
 			<loading v-show="hasMore"></loading>
 		</ul>
+		<div class="no-result-wrapper"
+				 v-show="!result.length && !hasMore">
+			<no-result title="抱歉，暂无搜索结果"></no-result>
+		</div>
 	</scroll>
 </template>
 <script type="text/javascript">
 import {search} from 'api/search'
 import {ERR_OK} from 'api/config'
 import {createSong} from 'common/js/song'
+
 import scroll from 'base/scroll'
 import loading from 'base/loading'
 
+import Singer from 'common/js/singer'
+import {mapMutations, mapActions} from 'vuex'
+
+import noResult from 'base/no-result'
 // 区分item样式
 const TYPE_SINGER = 'singer'
 const perpage = 20
@@ -80,6 +90,26 @@ const perpage = 20
 			getItemName(item) {
 				return item.type === TYPE_SINGER ? item.singername : `${item.name}-${item.singer}`
 			},
+			selectItem(item) {
+				if (item.type === TYPE_SINGER) {
+					const singer = new Singer({
+						id: item.singermid,
+						name: item.singername
+					})
+					this.$router.push({
+						path: `/search/${singer.id}`
+					})
+					this.set_singer(singer)
+				} else {
+					this.insertSong(item)
+				}
+			},
+			...mapMutations({
+          set_singer: 'SET_SINGER'
+      }),
+			...mapActions([
+				'insertSong'
+			]),
 			_normalize(data) {
 				let ret = []
 				if (data.zhida && data.zhida.singerid) {
@@ -108,7 +138,8 @@ const perpage = 20
 		},
 		components: {
 			scroll,
-			loading
+			loading,
+			noResult
 		}
 	}
 </script>

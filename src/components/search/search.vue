@@ -22,6 +22,7 @@
     	<div class="search-reuslt" v-show="query">
     		<suggest :query="query"></suggest>
     	</div>
+    	<router-view></router-view>
     </div>
 </template>
 <script>
