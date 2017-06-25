@@ -17,6 +17,17 @@
     					</li>
     				</ul>
     			</div>
+					<div class="search-history" v-show="searchHistory.length">
+						<h1 class="title">
+							<span class="text">搜索历史</span>
+							<span class="clear" @click="clearSearchHistory">
+								<i class="icon-clear"></i>
+							</span>
+						</h1>
+						<search-list :searches="searchHistory"
+													@select="addQuery"
+													@delete="deleteSearchHistory"></search-list>
+					</div>
     		</div>
     	</div>
     	<div class="search-reuslt" v-show="query">
@@ -32,7 +43,8 @@
 	import {getHotKey} from 'api/search'
 	import {ERR_OK} from 'api/config'
 	import suggest from 'components/suggest/suggest'
-	import {mapActions} from 'vuex'
+	import searchList from 'base/search-list'
+	import {mapActions, mapGetters} from 'vuex'
 
 	export default {
 		data() {
@@ -58,7 +70,9 @@
 				this.saveSearchHistory(this.query)
 			},
 			...mapActions([
-				'saveSearchHistory'
+				'saveSearchHistory',
+				'deleteSearchHistory',
+				'clearSearchHistory'
 				]),
 			_getHotKey() {
 				getHotKey().then((res) => {
@@ -68,9 +82,15 @@
 				})
 			}
 		},
+		computed: {
+			...mapGetters([
+				'searchHistory'
+				])
+		},
 		components: {
 			searchBox,
-			suggest
+			suggest,
+			searchList
 		}
 	}
 </script>
@@ -102,6 +122,21 @@
     					background: $color-highlight-background
     					font-size: $font-size-medium
     					color: $color-text-d
+    			.search-history
+    				position relative
+    				margin 0 20px
+    				.title
+    					display flex
+    					align-items center
+    					height 40px
+    					font-size: $font-size-medium
+    					color color $color-text-l
+    					.text
+    						flex: 1
+    					.clear
+    						.icon-clear
+    							font-size: $font-size-medium
+    							color color $color-text-d
     	.search-reuslt
     		position fixed
     		width: 100%
