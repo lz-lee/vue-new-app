@@ -35,6 +35,9 @@ import {debounce} from 'common/js/util'
 			},
 			setQuery(query) {
 				this.query = query
+			},
+			blur() {
+				this.$refs.query.blur()
 			}
 		}
 	}

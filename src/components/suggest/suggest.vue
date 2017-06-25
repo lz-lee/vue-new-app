@@ -2,7 +2,9 @@
 	<scroll class="suggest"
 					:data="result"
 					:pull-up="pullUp"
+					:before-scroll="beforeScroll"
 					@scrollToEnd="searchMore"
+					@beforeScroll="listScroll"
 					ref="suggest">
 		<ul class="suggest-list">
 			<li class="suggest-item"
@@ -54,7 +56,8 @@ const perpage = 20
 				page: 1,
 				result: [],
 				pullUp: true,
-				hasMore: true
+				hasMore: true,
+				beforeScroll: true
 			}
 		},
 		watch: {
@@ -103,6 +106,9 @@ const perpage = 20
 				} else {
 					this.insertSong(item)
 				}
+			},
+			listScroll() {
+				this.$emit('listScroll')
 			},
 			...mapMutations({
           set_singer: 'SET_SINGER'
