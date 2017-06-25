@@ -106,6 +106,8 @@ const perpage = 20
 				} else {
 					this.insertSong(item)
 				}
+				// 搜索历史操作不在基础组件里做，在其父组件里做
+				this.$emit('select')
 			},
 			listScroll() {
 				this.$emit('listScroll')
