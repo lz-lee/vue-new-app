@@ -112,6 +112,9 @@ const perpage = 20
 			listScroll() {
 				this.$emit('listScroll')
 			},
+			refresh() {
+				this.$refs.suggest.refresh()
+			},
 			...mapMutations({
           set_singer: 'SET_SINGER'
       }),
