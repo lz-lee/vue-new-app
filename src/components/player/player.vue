@@ -35,8 +35,10 @@
                     <div v-if="currentLyric">
                       <p ref="lyricLine"
                          class="text"
+                         :key="index"
                          :class="{'current': currentLineNum === index}"
-                         v-for="(line, index) in currentLyric.lines">{{line.txt}}</p>
+                         v-for="(line, index) in currentLyric.lines">{{line.txt}}
+                         </p>
                     </div>
                   </div>
                 </scroll>
@@ -88,10 +90,11 @@
                 </progress-circle>
             </div>
             <div class="control">
-                    <i class="icon-playlist"></i>
+                    <i class="icon-playlist" @click.stop="showPlaylist"></i>
             </div>
         </div>
     </transition>
+    <playlist ref="playlist"></playlist>
     <audio ref="audio" :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
     </div>
 </template>
@@ -105,6 +108,7 @@
     import ProgressBar from 'base/progress-bar'
     import ProgressCircle from 'base/progress-circle'
     import scroll from 'base/scroll'
+    import playlist from 'components/playlist/playlist'
 
     const transform = prefix('transform')
     const transitionDuration = prefix('transitionDuration')
@@ -123,6 +127,9 @@
         },
         watch: {
             currentSong(newSong, oldSong) {
+                // 当子组件playlist删除歌曲时，会改变currentSong，删除最后一条数据时currentSong为空，因此要做判断。
+                if (!newSong.id) return
+
                 if (newSong.id === oldSong.id) return
                 this.songReady = false
                 if (this.currentLyric) {
@@ -409,6 +416,9 @@
               this.$refs.middlel.style.opacity = opacity
               this.$refs.middlel.style[transitionDuration] = `${time}ms`
             },
+            showPlaylist() {
+                this.$refs.playlist.show()
+            },
             _leftPad(num, n = 2) {
                 let len = num.toString().length
                 while (len < n) {
@@ -440,7 +450,8 @@
         components: {
             ProgressBar,
             ProgressCircle,
-            scroll
+            scroll,
+            playlist
         }
     }
 </script>
