@@ -103,16 +103,18 @@
     import animations from 'create-keyframe-animation'
     import {prefix} from 'common/js/prefix'
     import {playMode} from 'common/js/config'
-    import {shuffle} from 'common/js/util'
     import Lyric from 'lyric-parser'
     import ProgressBar from 'base/progress-bar'
     import ProgressCircle from 'base/progress-circle'
     import scroll from 'base/scroll'
     import playlist from 'components/playlist/playlist'
+    import {playerMixin} from 'common/js/mixin'
 
     const transform = prefix('transform')
     const transitionDuration = prefix('transitionDuration')
+
     export default {
+        mixins: [playerMixin],
         data() {
             return {
                 // 可快速点击 prev 和next
@@ -176,9 +178,6 @@
             miniIcon() {
                 return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
             },
-            iconMode() {
-                return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
-            },
             disableCls() {
                 return this.songReady ? '' : 'disable'
             },
@@ -187,12 +186,8 @@
             },
             ...mapGetters([
                 'fullscreen',
-                'playlist',
-                'currentSong',
                 'playing',
-                'currentIndex',
-                'mode',
-                'sequencelist'
+                'currentIndex'
                 ])
         },
         methods: {
@@ -316,24 +311,6 @@
                 this.currentLyric.seek(currentTime * 1000)
               }
             },
-            changeMode() {
-                const mode = (this.mode + 1) % 3
-                this.setMode(mode)
-                let list = null
-                if (mode === playMode.random) {
-                    list = shuffle(this.sequencelist)
-                } else {
-                    list = this.sequencelist
-                }
-                this.resetCurrentIndex(list)
-                this.setPlaylist(list)
-            },
-            resetCurrentIndex(list) {
-                let index = list.findIndex((item) => {
-                    return this.currentSong.id === item.id
-                })
-                this.setCurrentIndex(index)
-            },
             getLyric() {
               this.currentSong.getLyric().then((res) => {
                 this.currentLyric = new Lyric(res, this.handleLyric)
@@ -440,11 +417,7 @@
                 return {x, y, scale}
             },
             ...mapMutations({
-                setFullScreen: 'SET_FULL_SCREEN',
-                setPlayingState: 'SET_PLAYING_STATE',
-                setCurrentIndex: 'SET_CURRENT_INDEX',
-                setMode: 'SET_PLAY_MODE',
-                setPlaylist: 'SET_PLAYLIST'
+                setFullScreen: 'SET_FULL_SCREEN'
             })
         },
         components: {
