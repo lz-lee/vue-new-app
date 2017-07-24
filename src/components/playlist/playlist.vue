@@ -95,10 +95,17 @@ export default {
       this.$refs.listContet.scrollToElement(this.$refs.listItem[index], 300)
     },
     deleteOne(item) {
+      if (item.deleting) {
+        return
+      }
+      item.deleting = true
       this.deleteSong(item)
       if (!this.playlist.length) {
         this.hide()
       }
+      setTimeout(() => {
+        item.deleting = false
+      }, 300)
     },
     showConfirm() {
       this.$refs.confirm.show()
