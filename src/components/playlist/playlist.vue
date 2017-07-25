@@ -13,11 +13,10 @@
         </div>
         <scroll class="list-content" :data="sequencelist"
                 ref="listContet">
-          <transition-group name="list" tag="ul">
+          <transition-group ref="list" name="list" tag="ul">
             <li class="item" v-for="(item, index) in sequencelist"
                 :key="item.id"
-                @click="selectItem(item, index)"
-                ref="listItem">
+                @click="selectItem(item, index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
               <span class="like">
@@ -94,7 +93,7 @@ export default {
         return current.id === song.id
       })
       // 歌曲列表滚动到对应位置
-      this.$refs.listContet.scrollToElement(this.$refs.listItem[index], 300)
+      this.$refs.listContet.scrollToElement(this.$refs.list.$el.children[index], 300)
     },
     deleteOne(item) {
       if (item.deleting) {
@@ -123,7 +122,9 @@ export default {
   watch: {
     currentSong(newSong, oldSong) {
       if (!this.showFlag || newSong.id === oldSong.id) return
-      this.scrollToCurrent(newSong)
+      setTimeout(() => {
+        this.scrollToCurrent(newSong)
+      }, 20)
     }
   },
   computed: {
