@@ -24,10 +24,16 @@ import {debounce} from 'common/js/util'
 				query: ''
 			}
 		},
-		created() {
-			this.$watch('query', debounce((newVal) => {
+		// created() {
+		// 	this.$watch('query', debounce((newVal) => {
+		// 		this.$emit('query', newVal)
+		// 	}, 300))
+		// },
+		watch: {
+			query: debounce(function(newVal) {
+				// 不能使用箭头函数，this不同
 				this.$emit('query', newVal)
-			}, 300))
+			}, 300)
 		},
 		methods: {
 			clear() {
