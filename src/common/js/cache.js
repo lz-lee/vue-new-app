@@ -1,8 +1,10 @@
 import storage from 'good-storage'
 
 const SEARCH_KEY = '__search__'
-
 const MAX_LENGTH = 15
+
+const PLAY_KEY = '__play__'
+const PLAY_MAX_LENGTH = 200
 
 // 将query值插入至arr，最新搜索结果总是在最前面
 function insertArr(arr, val, compare, maxlen) {
@@ -56,4 +58,17 @@ export function deleteSearch(query) {
 export function clearSearch() {
 	storage.remove(SEARCH_KEY)
 	return []
+}
+
+export function savePlay(song) {
+	let songs = storage.get(PLAY_KEY, [])
+	insertArr(songs, song, (item) => {
+		return item.id === song.id
+	}, PLAY_MAX_LENGTH)
+	storage.set(PLAY_KEY, songs)
+	return songs
+}
+
+export function loadPlay() {
+	return storage.get(PLAY_KEY, [])
 }
