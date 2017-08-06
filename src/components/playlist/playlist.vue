@@ -11,7 +11,9 @@
             </span>
           </h1>
         </div>
-        <scroll class="list-content" :data="sequencelist"
+        <scroll class="list-content"
+                :data="sequencelist"
+                :refreshDelay="refreshDelay"
                 ref="listContet">
           <transition-group ref="list" name="list" tag="ul">
             <li class="item" v-for="(item, index) in sequencelist"
@@ -59,7 +61,8 @@ export default {
   mixins: [playerMixin],
   data() {
     return {
-      showFlag: false
+      showFlag: false,
+      refreshDelay: 120
     }
   },
   methods: {

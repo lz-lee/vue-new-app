@@ -29,6 +29,7 @@
           <scroll v-if="currentIndex === 1"
                   ref="searchList"
                   class="list-scroll"
+                  :refreshDelay="refreshDelay"
                   :data="searchHistory">
             <div class="list-inner">
               <search-list @delete="deleteSearchHistory"

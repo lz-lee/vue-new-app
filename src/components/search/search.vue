@@ -6,6 +6,7 @@
     <div class="shortcut-wrapper" v-show="!query" ref="shortcutWrapper">
       <scroll class="shortcut"
               :data="shortcut"
+              :refreshDelay="refreshDelay"
               ref="shortcut">
         <div>
           <div class="hot-key">
