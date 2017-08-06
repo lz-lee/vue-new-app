@@ -44,6 +44,12 @@
                  @select="selectSuggest"
                  @listScroll="blurInput"></suggest>
       </div>
+      <top-tip ref="topTip" :delay="1500">
+        <div class="tip-title">
+          <i class="icon-ok"></i>
+          <span class="text">成功添加1首歌曲到播放列表</span>
+        </div>
+      </top-tip>
     </div>
   </transition>
 </template>
@@ -58,6 +64,8 @@
   import {mapGetters, mapActions} from 'vuex'
   import Song from 'common/js/song'
   import searchList from 'base/search-list'
+  import topTip from 'base/top-tip'
+
   export default {
     mixins: [searchMixin],
     data() {
@@ -96,6 +104,7 @@
       },
       selectSuggest() {
         this.saveSearch()
+        this.showTip()
       },
       switchItem(index) {
         this.currentIndex = index
@@ -103,7 +112,11 @@
       selectSong(song, index) {
         if (index !== 0) {
           this.insertSong(new Song(song))
+          this.showTip()
         }
+      },
+      showTip() {
+        this.$refs.topTip.show()
       },
       ...mapActions([
         'insertSong'
@@ -115,7 +128,8 @@
       switches,
       scroll,
       songList,
-      searchList
+      searchList,
+      topTip
     }
   }
 </script>
