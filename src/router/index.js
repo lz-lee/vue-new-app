@@ -8,6 +8,8 @@ import recommend from 'components/recommend/recommend'
 import singerDetail from 'components/singer-detail/singer-detail'
 import disc from 'components/disc/disc'
 import topList from 'components/top-list/top-list'
+import userCenter from 'components/user-center/user-center'
+
 Vue.use(Router)
 
 export default new Router({
@@ -51,6 +53,10 @@ export default new Router({
           path: ':id',
           component: topList
         }]
+      },
+      {
+        path: '/user',
+        component: userCenter
       }
   ]
 })

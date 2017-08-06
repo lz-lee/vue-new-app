@@ -6,6 +6,9 @@ const MAX_LENGTH = 15
 const PLAY_KEY = '__play__'
 const PLAY_MAX_LENGTH = 200
 
+const FAVORITE_KEY = '__favoriteList__'
+const FAVORITE_MAX_LENGTH = 200
+
 // 将query值插入至arr，最新搜索结果总是在最前面
 function insertArr(arr, val, compare, maxlen) {
 	const index = arr.findIndex(compare)
@@ -71,4 +74,26 @@ export function savePlay(song) {
 
 export function loadPlay() {
 	return storage.get(PLAY_KEY, [])
+}
+
+export function saveFavorite(song) {
+	let songs = storage.get(FAVORITE_KEY, [])
+	insertArr(songs, song, (item) => {
+		return songs.id === item.id
+	}, FAVORITE_MAX_LENGTH)
+	storage.set(FAVORITE_KEY, songs)
+	return songs
+}
+
+export function deleteFavorite(song) {
+	let songs = storage.get(FAVORITE_KEY, [])
+	deleteFromArr(songs, (item) => {
+		return item.id === song.id
+	})
+	storage.set(FAVORITE_KEY, songs)
+	return songs
+}
+
+export function loadFavorite() {
+	return storage.get(FAVORITE_KEY, [])
 }
