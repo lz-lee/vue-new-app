@@ -40,6 +40,9 @@
                          v-for="(line, index) in currentLyric.lines">{{line.txt}}
                          </p>
                     </div>
+                    <div class="pure-music" v-show="isPureMusic">
+                        <p>{{pureMusicLyric}}</p>
+                    </div>
                   </div>
                 </scroll>
             </div>
@@ -114,7 +117,7 @@
 
     const transform = prefix('transform')
     const transitionDuration = prefix('transitionDuration')
-
+    const timeExp = /\[(\d{2}):(\d{2}):(\d{2})]/g
     export default {
         mixins: [playerMixin],
         data() {
@@ -126,7 +129,9 @@
                 currentLyric: null,
                 currentLineNum: 0,
                 currentShow: 'cd',
-                playingLyric: ''
+                playingLyric: '',
+                isPureMusic: false,
+                pureMusicLyric: ''
             }
         },
         watch: {
@@ -249,6 +254,7 @@
                 if (!this.songReady) return
                 if (this.playlist.length === 1) {
                   this.loop()
+                  return
                 } else {
                   let index = this.currentIndex - 1
                   if (index === -1) index = this.playlist.length - 1
@@ -269,6 +275,7 @@
             loop() {
                 this.$refs.audio.currentTime = 0
                 this.$refs.audio.play()
+                this.setPlayingState(true)
                 if (this.currentLyric) {
                   this.currentLyric.seek(0)
                 }
@@ -278,6 +285,7 @@
                 // 处理playlist 只有一条数据的情况
                 if (this.playlist.length === 1) {
                   this.loop()
+                  return
                 } else {
                   let index = this.currentIndex + 1
                   if (index === this.playlist.length) index = 0
@@ -290,6 +298,9 @@
             ready() {
                 this.songReady = true
                 this.savePlayHistory(this.currentSong)
+                if (this.currentLyric && !this.isPureMusic) {
+                    this.currentLyric.seek(this.currentTime * 1000)
+                }
             },
             error() {
                 this.songReady = true
@@ -316,11 +327,21 @@
             },
             getLyric() {
               this.currentSong.getLyric().then((res) => {
+                // audio.play() 和getLyric是同步，而获取歌词是异步，当在获取歌词的时候切换歌曲，会发出多次获取歌词异步请求，因此要做判断。
+                if (this.currentSong.lyric !== res) {
+                    return
+                }
                 this.currentLyric = new Lyric(res, this.handleLyric)
-                if (this.playing) {
-                  // 此时用户有可能已经播放了歌曲，切到对应位置
-                  const currentTime = this.currentSong.duration * this.percent * 1000
-                  this.currentLyric.seek(currentTime)
+                this.isPureMusic = !this.currentLyric.lines.length
+                if (this.isPureMusic) {
+                    this.pureMusicLyric = this.currentLyric.lrc.replace(timeExp, '').trim()
+                    this.playingLyric = this.pureMusicLyric
+                } else {
+                    if (this.playing && this.songReady) {
+                    // 此时用户有可能已经播放了歌曲，切到对应位置
+                    const currentTime = this.currentSong.duration * this.percent * 1000
+                    this.currentLyric.seek(currentTime)
+                    }
                 }
               }).catch(() => {
                 this.currentLyric = null
@@ -555,6 +576,11 @@
                       font-size $font-size-medium
                       &.current
                         color $color-text
+                    .pure-music
+                        padding-top 50%
+                        line-height 32px
+                        color: $color-text-l
+                        font-size $font-size-medium
             .bottom
                 position: absolute
                 bottom: 50px
