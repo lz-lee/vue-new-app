@@ -54,7 +54,10 @@
                 <div class="progress-wrapper">
                     <span class="time time-l">{{format(currentTime)}}</span>
                     <div class="progress-bar-wrapper">
-                        <progress-bar :percent="percent" @percentChange="onPercentChange"></progress-bar>
+                        <progress-bar :percent="percent"
+                                      ref="progressBar"
+                                      @percentChange="onPercentChange"
+                                      @percentChanging="onPercentChanging"></progress-bar>
                     </div>
                     <span class="time time-r">{{format(currentSong.duration)}}</span>
                 </div>
@@ -168,6 +171,7 @@
               if (newVal) {
                 setTimeout(() => {
                   this.$refs.lyricList.refresh()
+                  this.$refs.progressBar.setProgressOffset(this.percent)
                 })
               }
             }
@@ -238,7 +242,12 @@
                 this.$refs.cdWrapper.style.transition = 'all .4s'
                 const {x, y, scale} = this._getPosandScale()
                 this.$refs.cdWrapper.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`
-                this.$refs.cdWrapper.addEventListener('transitionend', done)
+                const timer = setTimeout(done, 400)
+                this.$refs.cdWrapper.addEventListener('transitionend', () => {
+                    clearTimeout(timer)
+                    done()
+                })
+                // this.$refs.cdWrapper.addEventListener('transitionend', done)
             },
             afterLeave() {
                 this.$refs.cdWrapper.style.transition = ''
@@ -266,6 +275,7 @@
                 }
             },
             end() {
+                this.currentTime = 0
               if (this.mode === playMode.loop) {
                 this.loop()
               } else {
@@ -317,13 +327,19 @@
             },
             onPercentChange(percent) {
               const currentTime = this.currentSong.duration * percent
-              this.$refs.audio.currentTime = currentTime
+              this.currentTime = this.$refs.audio.currentTime = currentTime
               // 暂停状态下拖动结束后改变状态
               if (!this.playing) this.togglePlaying()
               // 拖动滚动条，歌词找到对应位置
               if (this.currentLyric) {
                 this.currentLyric.seek(currentTime * 1000)
               }
+            },
+            onPercentChanging(percent) {
+                this.currentTime = this.currentSong.duration * percent
+                if (this.currentLyric) {
+                    this.currentLyric.seek(this.currentTime * 1000)
+                }
             },
             getLyric() {
               this.currentSong.getLyric().then((res) => {
@@ -350,6 +366,9 @@
               })
             },
             handleLyric({lineNum, txt}) {
+              if (!this.$refs.lyricLine) {
+                return
+              }
               this.currentLineNum = lineNum
               if (lineNum > 5) {
                 let lineEl = this.$refs.lyricLine[lineNum - 5]

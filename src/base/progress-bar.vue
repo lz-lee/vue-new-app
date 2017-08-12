@@ -25,11 +25,7 @@ const progressWidth = 16
         },
         watch: {
             percent(newVal) {
-                if (newVal >= 0 && !this.touch.initaited) {
-                    const barWidth = this.$refs.progressBar.clientWidth - progressWidth
-                    const offsetWidth = newVal * barWidth
-                    this._offset(offsetWidth)
-                }
+                this.setProgressOffset(newVal)
             }
         },
         created() {
@@ -46,6 +42,7 @@ const progressWidth = 16
                 const diffX = e.touches[0].pageX - this.touch.startX
                 const offsetWidth = Math.min(this.$refs.progressBar.clientWidth - progressWidth, Math.max(0, this.touch.left + diffX))
                 this._offset(offsetWidth)
+                this.$emit('percentChanging', this._getPercent())
             },
             progressTouchEnd() {
                 this.touch.initaited = false
@@ -57,14 +54,23 @@ const progressWidth = 16
                 this._offset(offsetWidth)
                 this._triggerPercent()
             },
+            setProgressOffset(percent) {
+                if (percent >= 0 && !this.touch.initaited) {
+                    const barWidth = this.$refs.progressBar.clientWidth - progressWidth
+                    const offsetWidth = percent * barWidth
+                    this._offset(offsetWidth)
+                }
+            },
             _triggerPercent() {
-                const barWidth = this.$refs.progressBar.clientWidth - progressWidth
-                const percent = this.$refs.progress.clientWidth / barWidth
-                this.$emit('percentChange', percent)
+                this.$emit('percentChange', this._getPercent())
             },
             _offset(offsetWidth) {
                 this.$refs.progress.style.width = `${offsetWidth}px`
                 this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
+            },
+            _getPercent() {
+                const barWidth = this.$refs.progressBar.clientWidth - progressWidth
+                return this.$refs.progress.clientWidth / barWidth
             }
         }
     }

@@ -97,7 +97,7 @@ export const searchMixin = {
   },
   methods: {
     onQueryChange(query) {
-      this.query = query
+      this.query = query.trim()
     },
     blurInput() {
         this.$refs.searchBox.blur()

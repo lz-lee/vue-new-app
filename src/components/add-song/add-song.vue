@@ -89,9 +89,19 @@
         'playHistory'
       ])
     },
+    watch: {
+      query(newVal) {
+        if (!newVal) {
+          this.refreshList()
+        }
+      }
+    },
     methods: {
       show() {
         this.showFlag = true
+        this.refreshList()
+      },
+      refreshList() {
         setTimeout(() => {
           if (this.currentIndex === 0) {
             this.$refs.songList.refresh()

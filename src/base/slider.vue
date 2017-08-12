@@ -108,8 +108,10 @@
             },
             refresh() {
               // 设置一个标识，当resize时不需要将容器宽度加上两倍宽度，调用bsrcoll的refresh来重新计算width
-              this._setSliderWidth(true)
-              this.slider.refresh()
+              if (this.slider) {
+                this._setSliderWidth(true)
+                this.slider.refresh()
+              }
             }
         },
         mounted() {
@@ -124,7 +126,7 @@
             }, 20)
 
             window.addEventListener('resize', () => {
-              if (!this.slider) {
+              if (!this.slider || !this.slider.enabled) {
                 return
               }
               clearTimeout(this.resizeTimer)
@@ -141,11 +143,26 @@
             })
         },
         activated() {
+          this.slider.enable()
+          let pageIndex = this.slider.getCurrentPage().pageX
+          if (pageIndex > this.dots.length) {
+            pageIndex = pageIndex % this.dots.length
+          }
+          this.slider.goToPage(pageIndex, 0, 0)
+          if (this.loop) {
+            pageIndex -= 1
+          }
+          this.currentPageIndex = pageIndex
           if (this.autoPlay) {
             this._play()
           }
         },
         deactivated() {
+          this.slider.disable()
+          clearTimeout(this.timer)
+        },
+        beforeDestroy() {
+          this.slider.disable()
           clearTimeout(this.timer)
         }
     }
